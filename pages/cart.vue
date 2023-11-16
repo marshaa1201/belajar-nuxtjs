@@ -1,94 +1,69 @@
-<template>
-    <div class="home">
-      <section class="hero">
-        <div class="hero-content">
-          <h1>Selamat datang di website kami</h1>
-        </div>
-      </section>
-  
-      
-    </div>
-  </template>
-  
-  <style scoped>
-  .home {
-    background-color: #AAC8A7;
-    padding: 40px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .hero {
-    background: url('/path/to/hero-image.jpg') center/cover no-repeat;
-    color: #fff;
-    text-align: center;
-    padding: 60px 0;
-    background-size: cover;
-  }
-  
-  .hero-content {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
-  }
-  
-  p {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-  }
-  
-  .btn-primary {
-    display: inline-block;
-    padding: 15px 30px;
-    background-color: #B3A492;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 1.5rem;
-    transition: background-color 0.3s;
-  }
-  
-  .btn-primary:hover {
-    background-color: #4F4A45;
-  }
-  
-  .featured-products {
-    margin-top: 40px;
-    text-align: center;
-  }
-  
-  .product-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .product-card {
-    margin: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .product-card img {
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-  }
-  
-  .product-card h3 {
-    font-size: 2rem;
-  }
-  
-  .product-card p {
-    font-size: 1.5rem;
-    margin-top: 10px;
+<script lang="ts" setup>
+  import type { Products } from '~/types/products';
+  const removeCart = (id: number) => {
+products.value = products.value.filter((item) => item.id !== id);
+localStorage.setItem("products", JSON.stringify(products.value));
 }
-</style>
+  const products = ref<Products[]>([]);
+  const totalPrice = computed(() => {
+    return products.value.filter((product) => product.price !==
+     undefined).reduce((accumulator, currentValue) => accumulator +
+     currentValue.price!, 0);
+  })
+
+onMounted(() => {
+  let localStorageData = localStorage.getItem("products");
+      if (localStorageData) {
+       products.value = JSON.parse(localStorageData);
+   }
+})
+</script>
+
+
+<template>
+  <section>
+  <div class="container">
+  <div class="py-10 flex gap-6">
+    <div class="w-[70%]">
+      <div class="flex justify-between items-center pb-7 border-b border-gray-
+      300 mb-6">
+        <h1 class="text-3xl font-medium">Shopping Cart</h1>
+        <p class="text-3xl font-medium">{{ products.length }} Items</p>
+      </div>
+      <div v-if="products.length > 0" class="flex flex-col gap-6">
+<template v-for="(item, index) in products" :key="index">
+<CardsCardCart :product="item" @removeCart="removeCart"/>
+</template>
+</div>
+      <div v-else>
+        <h5 class="text-xl font-light text-center">Cart is empty</h5>
+    </div>
+</div>
+<div class="w-[30%] bg-white shadow-xl h-max p-6">
+<h3 class="text-xl font-medium mb-6">Order Summary</h3>
+<div class="flex flex-col gap-3 border-b border-gray-300 pb-4">
+<div v-if="products.length > 0">
+<div v-for="(item, index) in products" :key="index"
+class="flex gap-4 items-center">
+<span class="text-limit limit-1 text-sm">{{ item.name
+}}</span>
+<span class="text-sm font-semibold">${{ item.price
+}}</span>
+</div>
+</div>
+<div v-else>
+<p class="text-sm text-center font-light">There are no to
+orders yet</p>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between mb-6">
+<span class="text-base">Total</span>
+<span class="text-base font-bold">${{ totalPrice }}</span>
+</div>
+<button class="bg-blue-600 text-white text-base font-bold w-full py-2
+rounded-lg">Checkout</button>
+</div>
+  </div>
+  </div>
+  </section>
+  </template>
